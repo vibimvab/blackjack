@@ -270,8 +270,8 @@ def game_screen(player_num):
                     except AssertionError:
                         pass
 
-                    for i in range(player_num):
-                        player_list[i].bet_result(dealer.hand[0].card)
+                    for player in player_list:
+                        player.bet_result(dealer.hand[0].card)
 
             # 화면 출력
             screen.blit(background, (0, 0))
@@ -305,10 +305,17 @@ def game_screen(player_num):
                 # 게임 종료
                 if pygame.mouse.get_pressed()[0] or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     game_stage = 0
-                    card_deck = [i + 1 for i in range(52 * 4)]
-                    for i in range(player_num):
-                        player_list[i].initialize()
+                    card_deck = list(range(1, 52 * 4 + 1))
+                    for player in player_list:
+                        player.initialize()
                     dealer.initialize()
+
+                    for player in player_list:
+                        if not player.is_bankrupted():
+                            break
+                    else:
+                        game_over_screen()
+                        return 1  # go to title screen
 
             # 화면 출력
             screen.blit(background, (0, 0))
@@ -319,6 +326,45 @@ def game_screen(player_num):
 
             pygame.display.update()
             clock.tick(FPS)
+
+
+def game_over_screen():
+    title_screen_button_pos = (WIDTH // 2, HEIGHT // 10 * 5)
+    title_screen_button = InflatableButton(50, 'Title Screen', title_screen_button_pos)
+    quit_button_pos = (WIDTH // 2, HEIGHT // 10 * 7)
+    quit_button = InflatableButton(50, 'Quit Game', quit_button_pos)
+
+    while True:
+        for event in pygame.event.get():
+            # 창 닫기
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            # 마우스 입력
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if title_screen_button.is_clicked():
+                    return
+                elif quit_button.is_clicked():
+                    pygame.quit()
+                    exit()
+
+            # 키보드 입력
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    pygame.quit()
+                    exit()
+
+                elif event.key == pygame.K_h:
+                    help_menu_screen()
+
+        screen.blit(background, (0, 0))
+        blit_text_with_center(screen, 100, "Game Over", (WIDTH // 2, HEIGHT // 4))
+        title_screen_button.draw(screen)
+        quit_button.draw(screen)
+
+        pygame.display.update()
+        clock.tick(FPS)
 
 
 def main():

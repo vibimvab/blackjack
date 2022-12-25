@@ -32,38 +32,48 @@ class Player(Person):
         self.money = 10000
         self.bet_size = 0
         self.hand_turn = 0
+        self.bankrupted = False
 
     def draw(self, game_stage, dealer_cards):
         self.screen.blit(self.text[30].render(f"Money: {self.money}", False, 'Black'),
                          (self.x_pos - 100, self.y_pos + 150))
-        if game_stage == 0:
-            # bet size
-            self.screen.blit(self.text[30].render(f"Bet: {self.bet_size}", False, 'Black'),
-                             (self.x_pos - 100, self.y_pos + 100))
 
         # 파산
-        if self.money < 0:
+        if self.is_bankrupted():
             self.screen.blit(self.text[50].render('Bankrupted', False, 'Black'), (self.x_pos - 105, 35 + self.y_pos))
 
         else:
+            if game_stage == 0:
+                # bet size
+                self.screen.blit(self.text[30].render(f"Bet: {self.bet_size}", False, 'Black'),
+                                 (self.x_pos - 100, self.y_pos + 100))
             if game_stage >= 1:
                 # 카드
                 for hand in self.hand:
                     hand.draw(game_stage, dealer_cards)
 
     def choose_bet_size(self, event, player_turn):
-        if self.money >= 0:
-            if event.type == pygame.KEYDOWN \
-                    and (event.key == pygame.K_1 or event.key == pygame.K_2 or event.key == pygame.K_3):
+        if not self.is_bankrupted():
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
-                    self.bet_size = 500
-                elif event.key == pygame.K_2:
+                    if self.money >= 500:
+                        self.bet_size = 500
+                        self.money -= self.bet_size
+                        return player_turn + 1
+                    else:
+                        self.bet_size = self.money
+                        self.money -= self.bet_size
+                        return player_turn + 1
+                elif event.key == pygame.K_2 and self.money >= 1000:
                     self.bet_size = 1000
-                elif event.key == pygame.K_3:
+                    self.money -= self.bet_size
+                    return player_turn + 1
+                elif event.key == pygame.K_3 and self.money >= 2000:
                     self.bet_size = 2000
-                self.money -= self.bet_size
-
-                return player_turn + 1
+                    self.money -= self.bet_size
+                    return player_turn + 1
+                else:
+                    return player_turn
             else:
                 return player_turn  # 인풋이 없을 때도 끊임 없이 리턴을 내지 않으면 event loop 안에서 player_turn == None 이 돼버림
         else:
@@ -81,7 +91,7 @@ class Player(Person):
             return player_turn
 
     def hit_stand(self, event, player_turn, card_deck):
-        if self.money >= 0:
+        if not self.is_bankrupted():
             if self.hand[self.hand_turn].value >= 21:
                 self.hand_turn += 1
                 return self.turn_end(player_turn)
@@ -99,14 +109,16 @@ class Player(Person):
 
                 # double down
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_d \
-                        and len(self.hand[self.hand_turn].card) == 2:
+                        and len(self.hand[self.hand_turn].card) == 2 \
+                        and self.money >= self.bet_size:
                     self.money = self.hand[self.hand_turn].double_down(self.money, card_deck)
                     self.hand_turn += 1
                     return self.turn_end(player_turn)
 
                 # split
                 elif event.type == pygame.KEYDOWN and event.key == pygame.K_v \
-                        and self.hand[self.hand_turn].can_be_split():
+                        and self.hand[self.hand_turn].can_be_split()\
+                        and self.money >= self.bet_size:
                     self.hand.append(Hand(self.screen, self.hand[self.hand_turn].split + 1, self.position,
                                           self.bet_size, card_deck, num=len(self.hand),
                                           split_card=self.hand[self.hand_turn].card.pop(1)))
@@ -123,10 +135,16 @@ class Player(Person):
         for hand in self.hand:
             self.money += hand.bet_result(dealer_card)
 
+    def is_bankrupted(self):
+        return self.bankrupted
+
     def initialize(self):
         self.hand = []
         self.bet_size = 0
         self.hand_turn = 0
+
+        if self.money <= 0:
+            self.bankrupted = True
 
     # def set_xy_pos(self, player, total_player):  # 플레이어 중간 추가 기능 위함
     #     deg = math.pi * 3 / 4 - (math.pi / (total_player * 4)) - (math.pi / (total_player * 4)) * player * 2
@@ -174,6 +192,6 @@ class Dealer(Person):
                                 self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
                                                  (-105 + self.x_pos, -55 + self.y_pos))
                                 return
-
-                self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
-                                 (-105 + self.x_pos, -55 + self.y_pos))
+                else:
+                    self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
+                                     (-105 + self.x_pos, -55 + self.y_pos))
