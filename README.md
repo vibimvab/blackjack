@@ -1,3 +1,4 @@
-# blackjack
-Project after first semenster of my college.
-V3 is the most object-oriented one.
+# Blackjack
+Project after first semester of my college.
+Used pygame module to create blackjack.
+V3 is most object-oriented and has more options for players.
