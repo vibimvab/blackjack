@@ -185,7 +185,7 @@ def game_screen(player_num):
         player_list.append(Player(screen, i, player_num))
     player_turn = 0
     card_deck = list(range(1, 52 * 4 + 1))
-    dealer = Dealer(screen, (WIDTH // 2, HEIGHT // 6))
+    dealer = Dealer(screen, (WIDTH // 2, HEIGHT // 6), card_deck)
     settings_button = SettingsButton((70, 70), 45)
 
     while True:
@@ -231,7 +231,7 @@ def game_screen(player_num):
             blit_text_with_center(screen, 30, "3: $2000", (WIDTH // 2, HEIGHT // 10 + 210))
 
             for player in player_list:
-                player.draw(game_stage, dealer.card)
+                player.draw(game_stage, dealer.hand[0].card)
 
             pygame.display.update()
             clock.tick(FPS)
@@ -261,18 +261,23 @@ def game_screen(player_num):
                     player_turn = 0
                     game_stage += 1
 
-                    for i in range(player_num):  # 모든 플레이어가 버스트 --> 딜 X
-                        if player_list[i].hand < 22:
-                            dealer.final_deal(card_deck)
-                            break
+                    try:
+                        for player in player_list:  # 모든 플레이어가 버스트 --> 딜 X
+                            for hand in player.hand:
+                                if hand.value < 22:
+                                    dealer.final_deal(card_deck)
+                                    raise AssertionError
+                    except AssertionError:
+                        pass
+
                     for i in range(player_num):
-                        player_list[i].bet_result(dealer.card)
+                        player_list[i].bet_result(dealer.hand[0].card)
 
             # 화면 출력
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
             for player in player_list:
-                player.draw(game_stage, dealer.card)
+                player.draw(game_stage, dealer.hand[0].card)
             dealer.draw(game_stage, player_list)
 
             pygame.display.update()
@@ -309,7 +314,7 @@ def game_screen(player_num):
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
             for player in player_list:
-                player.draw(game_stage, dealer.card)
+                player.draw(game_stage, dealer.hand[0].card)
             dealer.draw(game_stage, player_list)
 
             pygame.display.update()
