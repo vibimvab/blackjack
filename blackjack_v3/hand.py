@@ -70,6 +70,8 @@ class Hand:
         51: pygame.image.load(os.path.join('card', 'diamond_queen.png')),
         0: pygame.image.load(os.path.join('card', 'diamond_king.png'))
     }
+    player_cursor = pygame.image.load(os.path.join('card', 'player_cursor.png'))
+    player_cursor.set_colorkey((255, 255, 255))
 
     # 글씨 폰트
     text = {}
@@ -94,8 +96,10 @@ class Hand:
             self.deal(card_deck)
         self.value = self.calculate_hand(self.card)
 
-    def draw(self, game_stage, dealer_cards):
+    def draw(self, game_stage, dealer_cards, hand_turn: bool):
         if game_stage >= 1:
+            if hand_turn:
+                self.screen.blit(self.player_cursor, (self.x_pos - 130, self.y_pos + 20))
             # 카드
             self.draw_card()
             # 핸드 밸류
@@ -150,7 +154,8 @@ class Hand:
 
     def can_be_split(self):
         return len(self.card) == 2 and self.split < 2 \
-               and (self.card[0] % 13 == self.card[1] % 13 or self.card[0] // 10 == self.card[1] // 10 == 1)
+               and (self.card[0] % 13 == self.card[1] % 13 or (not 0 < self.card[0] % 13 < 10
+                                                               and not 0 < self.card[1] % 13 < 10))
 
     def bet_result(self, dealer_card) -> int:
         dealer_value = self.calculate_hand(dealer_card)

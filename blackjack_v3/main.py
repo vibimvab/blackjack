@@ -231,7 +231,7 @@ def game_screen(player_num):
             blit_text_with_center(screen, 30, "3: $2000", (WIDTH // 2, HEIGHT // 10 + 210))
 
             for player in player_list:
-                player.draw(game_stage, dealer.hand[0].card)
+                player.draw(game_stage, dealer.hand[0].card, player_turn)
 
             pygame.display.update()
             clock.tick(FPS)
@@ -277,7 +277,7 @@ def game_screen(player_num):
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
             for player in player_list:
-                player.draw(game_stage, dealer.hand[0].card)
+                player.draw(game_stage, dealer.hand[0].card, player_turn)
             dealer.draw(game_stage, player_list)
 
             pygame.display.update()
@@ -321,7 +321,7 @@ def game_screen(player_num):
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
             for player in player_list:
-                player.draw(game_stage, dealer.hand[0].card)
+                player.draw(game_stage, dealer.hand[0].card, player_turn)
             dealer.draw(game_stage, player_list)
 
             pygame.display.update()

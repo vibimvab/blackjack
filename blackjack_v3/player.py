@@ -29,12 +29,13 @@ class Player(Person):
         deg = math.pi * 3 / 4 - (math.pi / (total_player * 4)) - (math.pi / (total_player * 4)) * player * 2
         # FIXME: use WIDTH and HEIGHT for x_pos and y_pos
         super().__init__(screen, (840 + 1120 * math.cos(deg) // 1, -370 + 1120 * math.sin(deg) // 1))
+        self.player_num = player
         self.money = 10000
         self.bet_size = 0
         self.hand_turn = 0
         self.bankrupted = False
 
-    def draw(self, game_stage, dealer_cards):
+    def draw(self, game_stage, dealer_cards, player_turn):
         self.screen.blit(self.text[30].render(f"Money: {self.money}", False, 'Black'),
                          (self.x_pos - 100, self.y_pos + 150))
 
@@ -44,13 +45,16 @@ class Player(Person):
 
         else:
             if game_stage == 0:
+                if player_turn == self.player_num:
+                    self.screen.blit(self.player_cursor, (self.x_pos - 130, self.y_pos + 140))
                 # bet size
                 self.screen.blit(self.text[30].render(f"Bet: {self.bet_size}", False, 'Black'),
                                  (self.x_pos - 100, self.y_pos + 100))
             if game_stage >= 1:
-                # 카드
-                for hand in self.hand:
-                    hand.draw(game_stage, dealer_cards)
+                # 핸드 별로 bet size 따로 출력
+                for hand_num, hand in enumerate(self.hand):
+                    hand_turn = self.player_num == player_turn and self.hand_turn == hand_num
+                    hand.draw(game_stage, dealer_cards, hand_turn)
 
     def choose_bet_size(self, event, player_turn):
         if not self.is_bankrupted():
