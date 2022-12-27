@@ -7,11 +7,11 @@ pygame.init()
 
 
 class Person:
-    # 이미지 변수
+    # image variable
     player_cursor = pygame.image.load(os.path.join('card', 'player_cursor.png'))
     player_cursor.set_colorkey((255, 255, 255))
 
-    # 글씨 폰트
+    # text variable
     text = {}
     for font_size in range(10, 210, 10):
         text[font_size] = pygame.font.SysFont('Comic Sans MS', font_size)
@@ -35,75 +35,84 @@ class Player(Person):
         self.hand_turn = 0
         self.bankrupted = False
 
-    def draw(self, game_stage, dealer_cards, player_turn):
+    def draw(self, game_stage, dealer, player_turn):
+        # money
         self.screen.blit(self.text[30].render(f"Money: {self.money}", False, 'Black'),
                          (self.x_pos - 100, self.y_pos + 150))
 
-        # 파산
+        # bankrupted
         if self.is_bankrupted():
             self.screen.blit(self.text[50].render('Bankrupted', False, 'Black'), (self.x_pos - 105, 35 + self.y_pos))
 
         else:
-            if game_stage == 0:
-                if player_turn == self.player_num:
+            if game_stage == 0:  # betting stage
+                if player_turn == self.player_num:  # cursor to show which hand's turn
                     self.screen.blit(self.player_cursor, (self.x_pos - 130, self.y_pos + 140))
                 # bet size
                 self.screen.blit(self.text[30].render(f"Bet: {self.bet_size}", False, 'Black'),
                                  (self.x_pos - 100, self.y_pos + 100))
-            if game_stage >= 1:
-                # 핸드 별로 bet size 따로 출력
+
+            if game_stage >= 1:  # hit/stand, result stage
                 for hand_num, hand in enumerate(self.hand):
                     hand_turn = self.player_num == player_turn and self.hand_turn == hand_num
-                    hand.draw(game_stage, dealer_cards, hand_turn)
+                    hand.draw(game_stage, dealer.hand[0].card, hand_turn)
 
     def choose_bet_size(self, event, player_turn, game_stage):
-        if not game_stage == 0:
+        if not game_stage == 0:  # if not betting stage
             return player_turn
+
         elif self.is_bankrupted():
             return player_turn + 1
+
         else:
-            if event.type != pygame.KEYDOWN:
-                return player_turn
-            else:
+            # keyboard input
+            if event.type == pygame.KEYDOWN:
+                # bet size 500 selected
                 if event.key == pygame.K_1:
                     if self.money >= 500:
                         self.bet_size = 500
                         self.money -= self.bet_size
                         return player_turn + 1
-                    else:
+                    else:  # not enough money --> all in
                         self.bet_size = self.money
                         self.money -= self.bet_size
                         return player_turn + 1
+
+                # bet size 1000 selected
                 elif event.key == pygame.K_2 and self.money >= 1000:
                     self.bet_size = 1000
                     self.money -= self.bet_size
                     return player_turn + 1
+
+                # bet size 2000 selected
                 elif event.key == pygame.K_3 and self.money >= 2000:
                     self.bet_size = 2000
                     self.money -= self.bet_size
                     return player_turn + 1
                 else:
                     return player_turn
+            else:
+                return player_turn
 
     def initial_deal(self, card_deck):
         if self.money >= 0:
             self.hand.append(Hand(self.screen, 0, self.position, self.bet_size, card_deck))
 
     def turn_end(self, player_turn):
-        if self.hand_turn >= len(self.hand):
+        if self.hand_turn >= len(self.hand):  # action done for all hands
             self.hand_turn = 0
             return player_turn + 1
         else:
             return player_turn
 
     def hit_stand(self, event, player_turn, card_deck, game_stage):
-        if not game_stage == 1:
+        if not game_stage == 1:  # if not hit/stand stage
             return player_turn
 
         elif self.is_bankrupted():
             return player_turn + 1
 
-        elif self.hand[self.hand_turn].value >= 21:
+        elif self.hand[self.hand_turn].value >= 21:  # if this hand value is 21
             self.hand_turn += 1
             return self.turn_end(player_turn)
 
@@ -155,21 +164,43 @@ class Player(Person):
         if self.money <= 0:
             self.bankrupted = True
 
-    # def set_xy_pos(self, player, total_player):  # 플레이어 중간 추가 기능 위함
-    #     deg = math.pi * 3 / 4 - (math.pi / (total_player * 4)) - (math.pi / (total_player * 4)) * player * 2
-    #     self.x_pos = 840 + 1120 * math.cos(deg)
-    #     self.y_pos = -370 + 1120 * math.sin(deg)
-
 
 class Dealer(Person):
     card_back = pygame.image.load(os.path.join('card', 'card_back.png'))
 
-    def __init__(self, screen, position, card_deck):
+    def __init__(self, screen, position):
         super().__init__(screen, position)
-        self.hand = [Hand(self.screen, -1, self.position, -1, card_deck)]
+        self.hand: [Hand] = []
+
+    def draw(self, game_stage, player_list):
+        if game_stage >= 1:
+            # cards
+            self.hand[0].draw_card()
+
+            # betting stage, hide first card
+            if game_stage == 1:
+                self.screen.blit(self.card_back, (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
+
+            # hit/stand, result stage
+            elif game_stage >= 2:
+                if len(self.hand[0].card) == 2:  # if dealer have only two cards, hide first card
+                    self.screen.blit(self.card_back, (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
+
+                    # draw front and show dealer hand value, if one of the players is not busted
+                    for player in player_list:
+                        for hand in player.hand:
+                            if hand.value < 22:
+                                self.screen.blit(Hand.card_value[self.hand[0].card[1]],
+                                                 (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
+                                self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
+                                                 (-105 + self.x_pos, -55 + self.y_pos))
+
+                else:  # if dealer have more than 3 cards, no need to hide first card, just show dealer hand value
+                    self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
+                                     (-105 + self.x_pos, -55 + self.y_pos))
 
     def initial_deal(self, card_deck):
-        self.hand = [Hand(self.screen, -1, self.position, -1, card_deck)]
+        self.hand.append(Hand(self.screen, -1, self.position, -1, card_deck))
 
     def final_deal(self, card_deck):
         while True:
@@ -179,28 +210,4 @@ class Dealer(Person):
             self.hand[0].deal(card_deck)
 
     def initialize(self):
-        self.hand[0].card = []
-        self.hand[0].value = 0
-
-    def draw(self, game_stage, player_list):
-        if game_stage >= 1:
-            # 딜러 카드
-            self.hand[0].draw_card()
-            if game_stage == 1:
-                self.screen.blit(self.card_back, (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
-
-            if game_stage >= 2:
-                if len(self.hand[0].card) == 2:  # 일단 카드 뒷면 그려 놓고 버스트 아닌 사람이 있으면 다시 그림
-                    self.screen.blit(self.card_back, (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
-
-                    for player in player_list:
-                        for hand in player.hand:
-                            if hand.value < 22:
-                                self.screen.blit(Hand.card_value[self.hand[0].card[1]],
-                                                 (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
-                                self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
-                                                 (-105 + self.x_pos, -55 + self.y_pos))
-                                return
-                else:
-                    self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
-                                     (-105 + self.x_pos, -55 + self.y_pos))
+        self.hand = []

@@ -5,6 +5,7 @@ from button import blit_text_with_center, InflatableButton, ColorChangeButton, S
 
 
 def settings_screen():
+    # button variables
     help_menu_button_pos = (WIDTH // 2, HEIGHT // 10 * 3)
     help_menu_button = InflatableButton(50, 'Help Menu', help_menu_button_pos)
     title_screen_button_pos = (WIDTH // 2, HEIGHT // 10 * 5)
@@ -14,20 +15,23 @@ def settings_screen():
 
     while True:
         for event in pygame.event.get():
-            # 창 닫기
+            # quit game
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 pygame.quit()
                 exit()
 
-            # 마우스 입력
+            # mouse input
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if help_menu_button.is_clicked():
                     help_menu_screen()
+
                 elif title_screen_button.is_clicked():
                     return False
+
                 elif resume_button.is_clicked():
                     return True
 
+        # generate screen
         screen.blit(background, (0, 0))
         help_menu_button.draw(screen)
         title_screen_button.draw(screen)
@@ -40,24 +44,24 @@ def settings_screen():
 def help_menu_screen() -> None:
     while True:
         for event in pygame.event.get():
-            # 창 닫기
+            # quit game
             if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 pygame.quit()
                 exit()
 
-            # 도움말 나가기
+            # exit help menu
             elif event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] \
                     or event.type == pygame.KEYDOWN and event.key == pygame.K_h \
                     or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 return
 
-        # 화면 출력
+        # generate screen
         screen.blit(background, (0, 0))
         screen.blit(text[50].render("New game: left click / space", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 50))
         screen.blit(text[50].render("Hit: left click / space", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 150))
         screen.blit(text[50].render("Stand: right click / S", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 250))
         screen.blit(text[50].render("Help: H", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 350))
-        screen.blit(text[50].render("Split: P", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 450))
+        screen.blit(text[50].render("Split: V", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 450))
         screen.blit(text[50].render("Double Down: D", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 550))
         screen.blit(text[50].render("Quit: Q", False, 'Black'), (WIDTH // 5, HEIGHT // 10 + 650))
 
@@ -66,6 +70,7 @@ def help_menu_screen() -> None:
 
 
 def title_screen() -> None:
+    # button variables
     start_game_button_pos = (WIDTH // 2, HEIGHT // 40 * 19)
     start_game_button = InflatableButton(50, 'Start Game', start_game_button_pos)
     help_menu_button_pos = (WIDTH // 2, HEIGHT // 40 * 19 + 150)
@@ -75,23 +80,24 @@ def title_screen() -> None:
 
     while True:
         for event in pygame.event.get():
-            # 창 닫기
+            # quit game
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
 
-            # 마우스 입력
+            # mouse input
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                # start game 버튼 클릭
                 if start_game_button.is_clicked():
                     return
+
                 elif help_menu_button.is_clicked():
                     help_menu_screen()
+
                 elif quit_button.is_clicked():
                     pygame.quit()
                     exit()
 
-            # 키보드 입력
+            # keyboard input
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
@@ -100,7 +106,7 @@ def title_screen() -> None:
                 elif event.key == pygame.K_h:
                     help_menu_screen()
 
-        # 화면 출력
+        # generate screen
         screen.blit(background, (0, 0))
         blit_text_with_center(screen, 100, "BLACKJACK", (WIDTH // 2, HEIGHT // 5))
         start_game_button.draw(screen)
@@ -112,7 +118,9 @@ def title_screen() -> None:
 
 
 def choose_player_num_screen() -> int:
-    player_num = 3
+    player_num = 3  # default player number
+
+    # button variables
     plus_player_num_button_pos = (WIDTH // 2 + 100, HEIGHT // 2)
     plus_player_num_button = ColorChangeButton(100, '+', plus_player_num_button_pos)
     minus_player_num_button_pos = (WIDTH // 2 - 100, HEIGHT // 2)
@@ -122,14 +130,14 @@ def choose_player_num_screen() -> int:
 
     while True:
         for event in pygame.event.get():
-            # 창 닫기
+            # quit game
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
 
-            # 키보드 입력
+            # keyboard input
             elif event.type == pygame.KEYDOWN:
-                # 인원수 선택
+                # choose player number
                 if event.key == pygame.K_1:
                     return 1
                 elif event.key == pygame.K_2:
@@ -145,16 +153,16 @@ def choose_player_num_screen() -> int:
                 elif event.key == pygame.K_7:
                     return 7
 
-                # 도움말 창으로
+                # to help screen
                 elif event.key == pygame.K_h:
                     help_menu_screen()
 
-                # 종료
+                # quit game
                 elif event.key == pygame.K_q:
                     pygame.quit()
                     exit()
 
-            # 마우스 입력
+            # mouse input
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if plus_player_num_button.is_clicked() and player_num < 7:
                     player_num += 1
@@ -165,7 +173,7 @@ def choose_player_num_screen() -> int:
                 elif start_game_button.is_clicked():
                     return player_num
 
-        # 화면 출력
+        # generate screen
         screen.blit(background, (0, 0))
         blit_text_with_center(screen, 80, "Choose number of players", (WIDTH // 2, HEIGHT // 5))
         blit_text_with_center(screen, 150, str(player_num), (WIDTH // 2, HEIGHT // 2))
@@ -178,25 +186,28 @@ def choose_player_num_screen() -> int:
 
 
 def game_screen(player_num):
-    # 게임 변수
-    game_stage = 0  # 0: 배팅, 1: hit/stand 2: 딜러 단계 및 정산
+    # game variables
+    game_stage = 0  # 0: betting stage, 1: hit/stand stage, 2: result stage
     player_list: [Player] = []
     for i in range(player_num):
         player_list.append(Player(screen, i, player_num))
     player_turn = 0
     card_deck = list(range(1, 52 * 4 + 1))
-    dealer = Dealer(screen, (WIDTH // 2, HEIGHT // 6), card_deck)
+    dealer = Dealer(screen, (WIDTH // 2, HEIGHT // 6))
+
+    # button variables
     settings_button = SettingsButton((70, 70), 45)
 
     while True:
+        # betting stage
         if game_stage == 0:
             for event in pygame.event.get():
-                # 창 닫기
+                # quit game
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
 
-                # 키보드 입력
+                # keyboard input
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_h:
                         help_menu_screen()
@@ -205,25 +216,25 @@ def game_screen(player_num):
                         pygame.quit()
                         exit()
 
-                # 마우스 입력
+                # mouse input
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if settings_button.is_clicked():
-                        if not settings_screen():
+                        if not settings_screen():  # if player clicked title screen button in settings screen
                             return 1
                         break
 
-                # 돌아가면서 배팅
+                # take turn betting
                 player_turn = player_list[player_turn].choose_bet_size(event, player_turn, game_stage)
-                if player_turn == player_num:  # 모든 플레이어가 베팅을 마치면
+                if player_turn == player_num:  # when every player is done
                     player_turn = 0
                     game_stage += 1
 
-                    # 딜
+                    # deal
                     for player in player_list:
                         player.initial_deal(card_deck)
                     dealer.initial_deal(card_deck)
 
-            # 화면 출력
+            # generate screen
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
             blit_text_with_center(screen, 50, "Choose your bet size", (WIDTH // 2, HEIGHT // 10))
@@ -231,39 +242,40 @@ def game_screen(player_num):
             blit_text_with_center(screen, 30, "2: $1000", (WIDTH // 2, HEIGHT // 10 + 140))
             blit_text_with_center(screen, 30, "3: $2000", (WIDTH // 2, HEIGHT // 10 + 210))
 
-            for player in player_list:
-                player.draw(game_stage, dealer.hand[0].card, player_turn)
+            for player in player_list:  # draw players
+                player.draw(game_stage, dealer, player_turn)
 
             pygame.display.update()
             clock.tick(FPS)
 
-        # hit/stand 단계
+        # hit/stand stage
         elif game_stage == 1:
             for event in pygame.event.get():
+                # quit game
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                     pygame.quit()
                     exit()
 
-                # 키보드 입력
+                # keyboard input
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_h:
                         help_menu_screen()
 
-                # 마우스 입력
+                # mouse input
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if settings_button.is_clicked():
                         if not settings_screen():
                             return 1
                         break
 
-                # 플레이어 액션
+                # player action
                 player_turn = player_list[player_turn].hit_stand(event, player_turn, card_deck, game_stage)
-                if player_turn == player_num:  # 다음 단계로
+                if player_turn == player_num:  # when every player is done
                     player_turn = 0
                     game_stage += 1
 
-                    try:
-                        for player in player_list:  # 모든 플레이어가 버스트 --> 딜 X
+                    try:  # if every player is busted --> no dealer deal
+                        for player in player_list:
                             for hand in player.hand:
                                 if hand.value < 22:
                                     dealer.final_deal(card_deck)
@@ -271,39 +283,40 @@ def game_screen(player_num):
                     except AssertionError:
                         pass
 
-                    for player in player_list:
+                    for player in player_list:  # players get result
                         player.bet_result(dealer.hand[0].card)
 
-            # 화면 출력
+            # generate screen
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
-            for player in player_list:
-                player.draw(game_stage, dealer.hand[0].card, player_turn)
-            dealer.draw(game_stage, player_list)
+            for player in player_list:  # draw players
+                player.draw(game_stage, dealer, player_turn)
+            dealer.draw(game_stage, player_list)  # draw dealer
 
             pygame.display.update()
             clock.tick(FPS)
 
-        # 정산 단계
+        # result stage
         elif game_stage == 2:
             for event in pygame.event.get():
+                # quit game
                 if event.type == pygame.QUIT or event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                     pygame.quit()
                     exit()
 
-                # 키보드 입력
+                # keyboard input
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_h:
                         help_menu_screen()
 
-                # 마우스 입력
+                # mouse input
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if settings_button.is_clicked():
                         if not settings_screen():
                             return 1
                         break
 
-                # 게임 종료
+                # to next game, initialize
                 if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] \
                         or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     game_stage = 0
@@ -315,22 +328,23 @@ def game_screen(player_num):
                     for player in player_list:
                         if not player.is_bankrupted():
                             break
-                    else:
+                    else:  # if every player is bankrupted
                         game_over_screen()
                         return 1  # go to title screen
 
-            # 화면 출력
+            # generate screen
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
-            for player in player_list:
-                player.draw(game_stage, dealer.hand[0].card, player_turn)
-            dealer.draw(game_stage, player_list)
+            for player in player_list:  # draw players
+                player.draw(game_stage, dealer, player_turn)
+            dealer.draw(game_stage, player_list)  # draw dealer
 
             pygame.display.update()
             clock.tick(FPS)
 
 
 def game_over_screen():
+    # button variables
     title_screen_button_pos = (WIDTH // 2, HEIGHT // 10 * 5)
     title_screen_button = InflatableButton(50, 'Title Screen', title_screen_button_pos)
     quit_button_pos = (WIDTH // 2, HEIGHT // 10 * 7)
@@ -338,12 +352,12 @@ def game_over_screen():
 
     while True:
         for event in pygame.event.get():
-            # 창 닫기
+            # quit game
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
 
-            # 마우스 입력
+            # mouse input
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if title_screen_button.is_clicked():
                     return
@@ -351,7 +365,7 @@ def game_over_screen():
                     pygame.quit()
                     exit()
 
-            # 키보드 입력
+            # keyboard input
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
@@ -360,6 +374,7 @@ def game_over_screen():
                 elif event.key == pygame.K_h:
                     help_menu_screen()
 
+        # generate screen
         screen.blit(background, (0, 0))
         blit_text_with_center(screen, 100, "Game Over", (WIDTH // 2, HEIGHT // 4))
         title_screen_button.draw(screen)
@@ -370,7 +385,7 @@ def game_over_screen():
 
 
 def main():
-    # 게임 변수
+    # game variables
     run_screen = {
         1: title_screen,
         2: choose_player_num_screen,
@@ -379,7 +394,7 @@ def main():
     game_screen_num = 1
     player_num = 0
 
-    # 이벤트 루프
+    # event loop
     while True:
         # title_screen
         if game_screen_num == 1:
@@ -399,28 +414,27 @@ def main():
 if __name__ == '__main__':
     pygame.init()
 
-    # 화면 설정
+    # set screen size
     WIDTH = 1680
     HEIGHT = 1050
     screen_size = (WIDTH, HEIGHT - 55)
     screen = pygame.display.set_mode(screen_size)
 
-    # 화면 타이틀 설정
+    # set caption
     pygame.display.set_caption("BLACKJACK")
 
-    # frame rate 설정
+    # set frame rate
     FPS = 100
     clock = pygame.time.Clock()
 
-    # 배경 화면 설정
+    # set background
     background = pygame.Surface(screen_size)
     background_color = 'gray74'
     background.fill(background_color)
 
-    # 글씨 폰트 설정
+    # text with different sizes
     text = {}
     for font_size in range(10, 210, 10):
         text[font_size] = pygame.font.SysFont('Comic Sans MS', font_size)
 
-    # 실행
     main()

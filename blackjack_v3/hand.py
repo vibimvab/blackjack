@@ -12,7 +12,7 @@ def deal(card_deck, person_card):
 
 
 class Hand:
-    # 이미지 변수
+    # load images
     card_value = {
         1: pygame.image.load(os.path.join('card', 'spade_ace.png')),
         2: pygame.image.load(os.path.join('card', 'spade_two.png')),
@@ -73,7 +73,7 @@ class Hand:
     player_cursor = pygame.image.load(os.path.join('card', 'player_cursor.png'))
     player_cursor.set_colorkey((255, 255, 255))
 
-    # 글씨 폰트
+    # text
     text = {}
     for font_size in range(10, 210, 10):
         text[font_size] = pygame.font.SysFont('Comic Sans MS', font_size)
@@ -87,54 +87,60 @@ class Hand:
         self.y_pos = position[1] - num * 200
         self.bet_size = bet_size
 
-        self.card = []
-        if self.split == 0 or self.split == -1:  # 스플릿 안한 상태 또는 딜러
+        self.card: [int] = []
+        if self.split == 0 or self.split == -1:  # split not done (0) or dealer (-1)
             self.deal(card_deck)
             self.deal(card_deck)
-        elif split > 0:
+        elif split > 0:  # split hand
             self.card.append(split_card)
             self.deal(card_deck)
         self.value = self.calculate_hand(self.card)
 
     def draw(self, game_stage, dealer_cards, hand_turn: bool):
         if game_stage >= 1:
-            if hand_turn:
+            if hand_turn:  # cursor to show which hand's turn
                 self.screen.blit(self.player_cursor, (self.x_pos - 130, self.y_pos + 20))
-            # 카드
+            # cards
             self.draw_card()
-            # 핸드 밸류
+            # hand value
             self.screen.blit(self.text[40].render(f"{self.value}", False, 'Black'),
                              (-105 + self.x_pos, -55 + self.y_pos))
             # bet size
             self.screen.blit(self.text[30].render(f"Bet: {self.bet_size}", False, 'Black'),
                              (self.x_pos - 100, self.y_pos + 100))
 
-            # 버스트
+            # busted
             if self.value > 21:
                 self.screen.blit(self.text[40].render("BUSTED!", False, 'Black'),
                                  (-45 + self.x_pos, -55 + self.y_pos))
                 return
-            # 배팅 결과
+            # bet result
             if game_stage >= 2:
                 dealer_hand = Hand.calculate_hand(dealer_cards)
-                if self.value == 21 and len(self.card) == 2:  # 플레이어 블랙잭
-                    if dealer_hand == 21 and len(dealer_cards) == 2:  # 딜러도 블랙잭 --> 무승부
+
+                # player got blackjack
+                if self.value == 21 and len(self.card) == 2:
+                    if dealer_hand == 21 and len(dealer_cards) == 2:  # dealer also blackjack --> tie
                         self.screen.blit(self.text[40].render("DRAW!", False, 'Black'),
                                          (-45 + self.x_pos, -55 + self.y_pos))
-                    else:
+                    else:  # dealer not blackjack, player won
                         self.screen.blit(self.text[40].render("BLACKJACK!!!", False, 'Black'),
                                          (-45 + self.x_pos, -55 + self.y_pos))
-                elif dealer_hand == 21 and len(dealer_cards) == 2:  # 플레이어 블랙잭 아님, 딜러 블랙잭
+
+                # player not blackjack (possibly 21), dealer got blackjack
+                elif dealer_hand == 21 and len(dealer_cards) == 2:
                     self.screen.blit(self.text[40].render("Lose", False, 'Black'),
                                      (-45 + self.x_pos, -55 + self.y_pos))
-                else:  # 플레이어, 딜러가 블랙잭 아님
-                    if dealer_hand == self.value:
+
+                # both player and dealer don't have blackjack
+                else:
+                    if dealer_hand == self.value:  # tie
                         self.screen.blit(self.text[40].render("DRAW!", False, 'Black'),
                                          (-45 + self.x_pos, -55 + self.y_pos))
-                    elif dealer_hand > 21 or dealer_hand < self.value < 22:
+                    elif dealer_hand > 21 or dealer_hand < self.value < 22:  # player win
                         self.screen.blit(self.text[40].render("WIN!", False, 'Black'),
                                          (-45 + self.x_pos, -55 + self.y_pos))
-                    else:
+                    else:  # player lost
                         self.screen.blit(self.text[40].render("Lose", False, 'Black'),
                                          (-45 + self.x_pos, -55 + self.y_pos))
 
@@ -152,32 +158,34 @@ class Hand:
         self.deal(card_deck)
         return money - self.bet_size
 
-    def can_be_split(self):
+    def can_be_split(self) -> bool:  # return whether the hand can be split
         return len(self.card) == 2 and self.split < 2 \
                and (self.card[0] % 13 == self.card[1] % 13 or (not 0 < self.card[0] % 13 < 10
                                                                and not 0 < self.card[1] % 13 < 10))
 
     def bet_result(self, dealer_card) -> int:
         dealer_value = self.calculate_hand(dealer_card)
-        if self.value < 22:
-            if self.value == 21 and len(self.card) == 2:  # 플레이어 블랙잭
-                if dealer_value == 21 and len(dealer_card) == 2:  # 딜러도 블랙잭 --> 무승부
-                    return self.bet_size
-                else:
-                    return self.bet_size // 2 * 5
-            elif not (dealer_value == 21 and len(dealer_card) == 2):  # 딜러가 블랙잭이 아니라면
-                if dealer_value == self.value:
-                    return self.bet_size
-                elif dealer_value > 21 or dealer_value < self.value < 22:
-                    return self.bet_size * 2
-                else:
-                    return 0
-            else:
-                return 0
-        else:
+        if self.value > 21:  # if busted
             return 0
+        else:
+            if self.value == 21 and len(self.card) == 2:  # player got blackjack
+                if dealer_value == 21 and len(dealer_card) == 2:  # dealer also got blackjack --> tie
+                    return self.bet_size
+                else:  # win 1.5 bet
+                    return self.bet_size // 2 * 5
+
+            elif not (dealer_value == 21 and len(dealer_card) == 2):  # dealer not blackjack
+                if dealer_value == self.value:  # tie
+                    return self.bet_size
+                elif dealer_value > 21 or dealer_value < self.value < 22:  # win
+                    return self.bet_size * 2
+                else:  # lost
+                    return 0
+            else:  # player not blackjack (possibly 21), dealer blackjack
+                return 0
 
     @staticmethod
+    # calculate hand value
     def calculate_hand(cards):
         hand = 0
         ace_in_hand = False
