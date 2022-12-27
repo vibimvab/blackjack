@@ -276,10 +276,11 @@ def game_screen(player_num):
 
                     try:  # if every player is busted --> no dealer deal
                         for player in player_list:
-                            for hand in player.hand:
-                                if hand.value < 22:
-                                    dealer.final_deal(card_deck)
-                                    raise AssertionError
+                            if not player.is_bankrupted():
+                                for hand in player.hand:
+                                    if hand.value < 22:
+                                        dealer.final_deal(card_deck)
+                                        raise AssertionError
                     except AssertionError:
                         pass
 

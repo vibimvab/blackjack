@@ -189,12 +189,13 @@ class Dealer(Person):
 
                     # draw front and show dealer hand value, if one of the players is not busted
                     for player in player_list:
-                        for hand in player.hand:
-                            if hand.value < 22:
-                                self.screen.blit(Hand.card_value[self.hand[0].card[1]],
-                                                 (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
-                                self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
-                                                 (-105 + self.x_pos, -55 + self.y_pos))
+                        if not player.is_bankrupted():
+                            for hand in player.hand:
+                                if hand.value < 22:
+                                    self.screen.blit(Hand.card_value[self.hand[0].card[1]],
+                                                     (134 / len(self.hand[0].card) - 105 + self.x_pos, self.y_pos))
+                                    self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
+                                                     (-105 + self.x_pos, -55 + self.y_pos))
 
                 else:  # if dealer have more than 3 cards, no need to hide first card, just show dealer hand value
                     self.screen.blit(self.text[40].render(f"{self.hand[0].value}", False, 'Black'),
