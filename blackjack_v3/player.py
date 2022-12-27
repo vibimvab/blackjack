@@ -27,7 +27,8 @@ class Person:
 class Player(Person):
     def __init__(self, screen, player, total_player, width, height):
         deg = math.pi * 3 / 4 - (math.pi / (total_player * 4)) - (math.pi / (total_player * 4)) * player * 2
-        super().__init__(screen, (width//2 + width*2*math.cos(deg) // 3, -height//3 + width*2 * math.sin(deg) // 3))
+        diagonal = (width**2 + height**2)**(1/2)
+        super().__init__(screen, (width//2 + diagonal*5*math.cos(deg) // 9, -height//3 + diagonal*5*math.sin(deg) // 9))
         self.player_num = player
         self.money = 10000
         self.bet_size = 0

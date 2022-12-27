@@ -418,7 +418,7 @@ if __name__ == '__main__':
     # set screen size
     WIDTH = 1680
     HEIGHT = 1050
-    screen_size = (WIDTH, HEIGHT - 55)
+    screen_size = (WIDTH, HEIGHT)
     screen = pygame.display.set_mode(screen_size)
 
     # set caption
