@@ -156,7 +156,7 @@ class Hand:
     def double_down(self, money, card_deck):
         self.bet_size *= 2
         self.deal(card_deck)
-        return money - self.bet_size
+        return money - self.bet_size // 2
 
     def can_be_split(self) -> bool:  # return whether the hand can be split
         return len(self.card) == 2 and self.split < 2 \
