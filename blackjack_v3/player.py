@@ -56,9 +56,15 @@ class Player(Person):
                     hand_turn = self.player_num == player_turn and self.hand_turn == hand_num
                     hand.draw(game_stage, dealer_cards, hand_turn)
 
-    def choose_bet_size(self, event, player_turn):
-        if not self.is_bankrupted():
-            if event.type == pygame.KEYDOWN:
+    def choose_bet_size(self, event, player_turn, game_stage):
+        if not game_stage == 0:
+            return player_turn
+        elif self.is_bankrupted():
+            return player_turn + 1
+        else:
+            if event.type != pygame.KEYDOWN:
+                return player_turn
+            else:
                 if event.key == pygame.K_1:
                     if self.money >= 500:
                         self.bet_size = 500
@@ -78,10 +84,6 @@ class Player(Person):
                     return player_turn + 1
                 else:
                     return player_turn
-            else:
-                return player_turn  # 인풋이 없을 때도 끊임 없이 리턴을 내지 않으면 event loop 안에서 player_turn == None 이 돼버림
-        else:
-            return player_turn + 1
 
     def initial_deal(self, card_deck):
         if self.money >= 0:
@@ -94,46 +96,49 @@ class Player(Person):
         else:
             return player_turn
 
-    def hit_stand(self, event, player_turn, card_deck):
-        if not self.is_bankrupted():
-            if self.hand[self.hand_turn].value >= 21:
+    def hit_stand(self, event, player_turn, card_deck, game_stage):
+        if not game_stage == 1:
+            return player_turn
+
+        elif self.is_bankrupted():
+            return player_turn + 1
+
+        elif self.hand[self.hand_turn].value >= 21:
+            self.hand_turn += 1
+            return self.turn_end(player_turn)
+
+        else:
+            # hit
+            if pygame.mouse.get_pressed()[0] or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                self.hand[self.hand_turn].deal(card_deck)
+                return self.turn_end(player_turn)
+
+            # stand
+            elif pygame.mouse.get_pressed()[2] or event.type == pygame.KEYDOWN and event.key == pygame.K_s:
                 self.hand_turn += 1
                 return self.turn_end(player_turn)
 
+            # double down
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_d \
+                    and len(self.hand[self.hand_turn].card) == 2 \
+                    and self.money >= self.bet_size:
+                self.money = self.hand[self.hand_turn].double_down(self.money, card_deck)
+                self.hand_turn += 1
+                return self.turn_end(player_turn)
+
+            # split
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_v \
+                    and self.hand[self.hand_turn].can_be_split()\
+                    and self.money >= self.bet_size:
+                self.hand.append(Hand(self.screen, self.hand[self.hand_turn].split + 1, self.position,
+                                      self.bet_size, card_deck, num=len(self.hand),
+                                      split_card=self.hand[self.hand_turn].card.pop(1)))
+                self.hand[self.hand_turn].deal(card_deck)
+                self.money -= self.bet_size
+                return self.turn_end(player_turn)
+
             else:
-                # hit
-                if pygame.mouse.get_pressed()[0] or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    self.hand[self.hand_turn].deal(card_deck)
-                    return self.turn_end(player_turn)
-
-                # stand
-                elif pygame.mouse.get_pressed()[2] or event.type == pygame.KEYDOWN and event.key == pygame.K_s:
-                    self.hand_turn += 1
-                    return self.turn_end(player_turn)
-
-                # double down
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_d \
-                        and len(self.hand[self.hand_turn].card) == 2 \
-                        and self.money >= self.bet_size:
-                    self.money = self.hand[self.hand_turn].double_down(self.money, card_deck)
-                    self.hand_turn += 1
-                    return self.turn_end(player_turn)
-
-                # split
-                elif event.type == pygame.KEYDOWN and event.key == pygame.K_v \
-                        and self.hand[self.hand_turn].can_be_split()\
-                        and self.money >= self.bet_size:
-                    self.hand.append(Hand(self.screen, self.hand[self.hand_turn].split + 1, self.position,
-                                          self.bet_size, card_deck, num=len(self.hand),
-                                          split_card=self.hand[self.hand_turn].card.pop(1)))
-                    self.hand[self.hand_turn].deal(card_deck)
-                    self.money -= self.bet_size
-                    return self.turn_end(player_turn)
-
-                else:
-                    return self.turn_end(player_turn)
-        else:
-            return player_turn + 1
+                return self.turn_end(player_turn)
 
     def bet_result(self, dealer_card):
         for hand in self.hand:

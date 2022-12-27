@@ -20,7 +20,7 @@ def settings_screen():
                 exit()
 
             # 마우스 입력
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 if help_menu_button.is_clicked():
                     help_menu_screen()
                 elif title_screen_button.is_clicked():
@@ -46,7 +46,7 @@ def help_menu_screen() -> None:
                 exit()
 
             # 도움말 나가기
-            if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] \
+            elif event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] \
                     or event.type == pygame.KEYDOWN and event.key == pygame.K_h \
                     or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 return
@@ -81,7 +81,7 @@ def title_screen() -> None:
                 exit()
 
             # 마우스 입력
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 # start game 버튼 클릭
                 if start_game_button.is_clicked():
                     return
@@ -92,7 +92,7 @@ def title_screen() -> None:
                     exit()
 
             # 키보드 입력
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_q:
                     pygame.quit()
                     exit()
@@ -128,7 +128,7 @@ def choose_player_num_screen() -> int:
                 exit()
 
             # 키보드 입력
-            if event.type == pygame.KEYDOWN:
+            elif event.type == pygame.KEYDOWN:
                 # 인원수 선택
                 if event.key == pygame.K_1:
                     return 1
@@ -146,23 +146,23 @@ def choose_player_num_screen() -> int:
                     return 7
 
                 # 도움말 창으로
-                if event.key == pygame.K_h:
+                elif event.key == pygame.K_h:
                     help_menu_screen()
 
                 # 종료
-                if event.key == pygame.K_q:
+                elif event.key == pygame.K_q:
                     pygame.quit()
                     exit()
 
             # 마우스 입력
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            elif event.type == pygame.MOUSEBUTTONDOWN:
                 if plus_player_num_button.is_clicked() and player_num < 7:
                     player_num += 1
 
-                if minus_player_num_button.is_clicked() and player_num > 1:
+                elif minus_player_num_button.is_clicked() and player_num > 1:
                     player_num -= 1
 
-                if start_game_button.is_clicked():
+                elif start_game_button.is_clicked():
                     return player_num
 
         # 화면 출력
@@ -197,7 +197,7 @@ def game_screen(player_num):
                     exit()
 
                 # 키보드 입력
-                if event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_h:
                         help_menu_screen()
 
@@ -205,14 +205,15 @@ def game_screen(player_num):
                         pygame.quit()
                         exit()
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                # 마우스 입력
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     if settings_button.is_clicked():
                         if not settings_screen():
                             return 1
                         break
 
                 # 돌아가면서 배팅
-                player_turn = player_list[player_turn].choose_bet_size(event, player_turn)
+                player_turn = player_list[player_turn].choose_bet_size(event, player_turn, game_stage)
                 if player_turn == player_num:  # 모든 플레이어가 베팅을 마치면
                     player_turn = 0
                     game_stage += 1
@@ -244,19 +245,19 @@ def game_screen(player_num):
                     exit()
 
                 # 키보드 입력
-                if event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_h:
                         help_menu_screen()
 
                 # 마우스 입력
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     if settings_button.is_clicked():
                         if not settings_screen():
                             return 1
                         break
 
                 # 플레이어 액션
-                player_turn = player_list[player_turn].hit_stand(event, player_turn, card_deck)
+                player_turn = player_list[player_turn].hit_stand(event, player_turn, card_deck, game_stage)
                 if player_turn == player_num:  # 다음 단계로
                     player_turn = 0
                     game_stage += 1
@@ -291,19 +292,20 @@ def game_screen(player_num):
                     exit()
 
                 # 키보드 입력
-                if event.type == pygame.KEYDOWN:
+                elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_h:
                         help_menu_screen()
 
                 # 마우스 입력
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     if settings_button.is_clicked():
                         if not settings_screen():
                             return 1
                         break
 
                 # 게임 종료
-                if pygame.mouse.get_pressed()[0] or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                if event.type == pygame.MOUSEBUTTONDOWN and pygame.mouse.get_pressed()[0] \
+                        or event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     game_stage = 0
                     card_deck = list(range(1, 52 * 4 + 1))
                     for player in player_list:
