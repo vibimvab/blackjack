@@ -25,10 +25,9 @@ class Person:
 
 
 class Player(Person):
-    def __init__(self, screen, player, total_player):
+    def __init__(self, screen, player, total_player, width, height):
         deg = math.pi * 3 / 4 - (math.pi / (total_player * 4)) - (math.pi / (total_player * 4)) * player * 2
-        # FIXME: use WIDTH and HEIGHT for x_pos and y_pos
-        super().__init__(screen, (840 + 1120 * math.cos(deg) // 1, -370 + 1120 * math.sin(deg) // 1))
+        super().__init__(screen, (width//2 + width*2*math.cos(deg) // 3, -height//3 + width*2 * math.sin(deg) // 3))
         self.player_num = player
         self.money = 10000
         self.bet_size = 0

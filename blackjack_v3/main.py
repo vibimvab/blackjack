@@ -190,7 +190,7 @@ def game_screen(player_num):
     game_stage = 0  # 0: betting stage, 1: hit/stand stage, 2: result stage
     player_list: [Player] = []
     for i in range(player_num):
-        player_list.append(Player(screen, i, player_num))
+        player_list.append(Player(screen, i, player_num, WIDTH, HEIGHT))
     player_turn = 0
     card_deck = list(range(1, 52 * 4 + 1))
     dealer = Dealer(screen, (WIDTH // 2, HEIGHT // 6))
@@ -237,10 +237,10 @@ def game_screen(player_num):
             # generate screen
             screen.blit(background, (0, 0))
             settings_button.draw(screen, background_color)
-            blit_text_with_center(screen, 50, "Choose your bet size", (WIDTH // 2, HEIGHT // 10))
-            blit_text_with_center(screen, 30, "1: $500", (WIDTH // 2, HEIGHT // 10 + 70))
-            blit_text_with_center(screen, 30, "2: $1000", (WIDTH // 2, HEIGHT // 10 + 140))
-            blit_text_with_center(screen, 30, "3: $2000", (WIDTH // 2, HEIGHT // 10 + 210))
+            blit_text_with_center(screen, 50, "Choose your bet size", (dealer.position[0], dealer.position[1] - 40))
+            blit_text_with_center(screen, 30, "1: $500", (dealer.position[0], dealer.position[1] + 30))
+            blit_text_with_center(screen, 30, "2: $1000", (dealer.position[0], dealer.position[1] + 100))
+            blit_text_with_center(screen, 30, "3: $2000", (dealer.position[0], dealer.position[1] + 170))
 
             for player in player_list:  # draw players
                 player.draw(game_stage, dealer, player_turn)
