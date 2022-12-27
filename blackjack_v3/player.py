@@ -142,6 +142,7 @@ class Player(Person):
                 self.hand.append(Hand(self.screen, self.hand[self.hand_turn].split + 1, self.position,
                                       self.bet_size, card_deck, num=len(self.hand),
                                       split_card=self.hand[self.hand_turn].card.pop(1)))
+                self.hand[self.hand_turn].split += 1
                 self.hand[self.hand_turn].deal(card_deck)
                 self.money -= self.bet_size
                 return self.turn_end(player_turn)

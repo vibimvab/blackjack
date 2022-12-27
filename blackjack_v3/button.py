@@ -1,6 +1,10 @@
 import pygame
 import math
 
+text = {}
+for font_size in range(10, 210, 10):
+    text[font_size] = pygame.font.SysFont('Comic Sans MS', font_size)
+
 
 class SettingsButton:
     def __init__(self, position: tuple[int, int], radius):
@@ -35,15 +39,11 @@ class SettingsButton:
 
 
 class TextButton:
-    text = {}
-    for font_size in range(10, 210, 10):
-        text[font_size] = pygame.font.SysFont('Comic Sans MS', font_size)
-
     def __init__(self, text_size: int, message: str, position: tuple[int, int], color='Black'):
         self.text_size = text_size
         self.message = message
         self.color = color
-        self.text = self.text[text_size].render(message, False, color)
+        self.text = text[text_size].render(message, False, color)
         self.position = position
         self.rect = self.text.get_rect(center=(position[0], position[1]))
 
@@ -86,16 +86,16 @@ class InflatableButton(TextButton):
 
     def inflate(self):
         self.text_size += 10
-        self.text = self.text[self.text_size + 10].render(self.message, False, self.color)
+        self.text = text[self.text_size + 10].render(self.message, False, self.color)
         self.rect = self.text.get_rect(center=self.position)
 
     def deflate(self):
         self.text_size -= 10
-        self.text = self.text[self.text_size].render(self.message, False, self.color)
+        self.text = text[self.text_size].render(self.message, False, self.color)
         self.rect = self.text.get_rect(center=self.position)
 
 
 def blit_text_with_center(screen, text_size: int, message: str, position: tuple[int, int], color='Black'):
-    t = TextButton.text[text_size].render(message, False, color)
+    t = text[text_size].render(message, False, color)
     t_rect = t.get_rect(center=(position[0], position[1]))
     screen.blit(t, (t_rect.x, t_rect.y))
